@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
+//import { Sequelize } from 'sequelize-typescript';
 
+//TODO remove
 @Injectable()
 export class AppService {
-  //TODO delete
-  getHello(): string {
-    return 'Hello World!';
-  }
+  //constructor(private sequelize: Sequelize) {}
 }

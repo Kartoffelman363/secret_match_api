@@ -35,18 +35,24 @@ export class UsersService {
       }
     }
     return {
-      extra: {
-        pwd: regUsrBody.password,
-        hash: pwdHash,
-        name: regUsrBody.name,
-        email: regUsrBody.email,
-        users: await this.userModel.findAll(),
-        admins: await this.adminModel.findAll(),
-      },
       success: await compare(regUsrBody.password, pwdHash),
     };
   }
-  login(): Result {
-    return { success: true };
+
+  async findOneByEmail(email: string): Promise<Result> {
+    let usr: User | null;
+    try {
+      usr = await this.userModel.findOne({
+        where: {
+          email: email,
+        },
+      });
+    } catch {
+      return { success: false, extra: 'Database error' };
+    }
+    if (usr === null) {
+      return { success: false, extra: 'User not found' };
+    }
+    return { success: true, extra: usr };
   }
 }

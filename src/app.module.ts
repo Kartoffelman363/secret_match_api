@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
       dialect: 'mysql',
       host: 'localhost',
       port: 3306,
+      //TODO env
       username: 'root',
       password: 'root',
       database: 'secret_match',

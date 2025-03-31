@@ -15,7 +15,12 @@ export interface RegUsrBody {
   password: string;
 }
 
-@Table({ timestamps: false })
+export interface LoginUsrBody {
+  email: string;
+  password: string;
+}
+
+@Table({ timestamps: false, tableName: 'users' })
 export class User extends Model {
   @PrimaryKey
   @AutoIncrement

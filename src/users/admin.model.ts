@@ -11,7 +11,7 @@
 } from 'sequelize-typescript';
 import { User } from './user.model';
 
-@Table({ timestamps: false })
+@Table({ timestamps: false, tableName: 'admins' })
 export class Admin extends Model {
   @PrimaryKey
   @AutoIncrement

@@ -1,24 +1,22 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { Result, UsersService } from './users.service';
-import { LoginUsrBody, RegUsrBody } from './user.model';
+import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from '../auth/auth.service';
+import { RegUsrBody } from '../types/RegUsrBody';
+import { LoginUsrBody } from '../types/LoginUsrBody';
+import { LoginRes } from '../types/LoginRes';
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    private usersService: UsersService,
-    private authService: AuthService,
-  ) {}
+  constructor(private usersService: UsersService) {}
 
   @Post('register')
-  async postRegister(@Body() regUsrBody: RegUsrBody): Promise<Result> {
-    return await this.usersService.register(regUsrBody);
+  async postRegister(@Body() regUsrBody: RegUsrBody): Promise<void> {
+    await this.usersService.register(regUsrBody);
   }
 
   @UseGuards(AuthGuard('local'))
   @Post('login')
-  postLogin(@Body() loginUsrBody: LoginUsrBody): Result {
-    return this.authService.login();
+  async postLogin(@Body() loginUsrBody: LoginUsrBody): Promise<LoginRes> {
+    return await this.usersService.login(loginUsrBody);
   }
 }

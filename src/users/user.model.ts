@@ -9,17 +9,6 @@
   AllowNull,
 } from 'sequelize-typescript';
 
-export interface RegUsrBody {
-  email: string;
-  name: string;
-  password: string;
-}
-
-export interface LoginUsrBody {
-  email: string;
-  password: string;
-}
-
 @Table({ timestamps: false, tableName: 'users' })
 export class User extends Model {
   @PrimaryKey

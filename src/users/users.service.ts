@@ -1,23 +1,20 @@
-import { Injectable } from '@nestjs/common';
-import { compare, genSalt, hash } from 'bcrypt';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { genSalt, hash } from 'bcrypt';
 import { InjectModel } from '@nestjs/sequelize';
-import { RegUsrBody, User } from './user.model';
-import { Admin } from './admin.model';
-
-export interface Result {
-  success: boolean;
-  extra?: any;
-}
+import { User } from './user.model';
+import { RegUsrBody } from '../types/RegUsrBody';
+import { JwtService } from '@nestjs/jwt';
+import { LoginUsrBody } from '../types/LoginUsrBody';
+import { LoginRes } from '../types/LoginRes';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User)
     private userModel: typeof User,
-    @InjectModel(Admin)
-    private adminModel: typeof Admin,
+    private readonly jwtService: JwtService,
   ) {}
-  async register(regUsrBody: RegUsrBody): Promise<Result> {
+  async register(regUsrBody: RegUsrBody): Promise<void> {
     const salt = await genSalt();
     const pwdHash = await hash(regUsrBody.password, salt);
     try {
@@ -31,15 +28,20 @@ export class UsersService {
         error instanceof Error &&
         error.name === 'SequelizeUniqueConstraintError'
       ) {
-        return { success: false, extra: 'User already exists' };
+        throw new BadRequestException('User already exists');
       }
     }
+  }
+
+  async login(loginUsrBody: LoginUsrBody): Promise<LoginRes> {
     return {
-      success: await compare(regUsrBody.password, pwdHash),
+      jwtToken: await this.jwtService.signAsync({
+        username: loginUsrBody.email,
+      }),
     };
   }
 
-  async findOneByEmail(email: string): Promise<Result> {
+  async findOneByEmail(email: string): Promise<User> {
     let usr: User | null;
     try {
       usr = await this.userModel.findOne({
@@ -48,11 +50,11 @@ export class UsersService {
         },
       });
     } catch {
-      return { success: false, extra: 'Database error' };
+      throw new BadRequestException('Database error');
     }
     if (usr === null) {
-      return { success: false, extra: 'User not found' };
+      throw new BadRequestException('User not found');
     }
-    return { success: true, extra: usr };
+    return usr;
   }
 }

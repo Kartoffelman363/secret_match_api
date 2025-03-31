@@ -3,20 +3,23 @@
   Model,
   Table,
   Max,
-  ForeignKey,
-  Default,
   AutoIncrement,
   PrimaryKey,
   Unique,
   AllowNull,
 } from 'sequelize-typescript';
 
+export interface RegUsrBody {
+  email: string;
+  name: string;
+  password: string;
+}
+
 @Table({ timestamps: false })
-export class Users extends Model {
+export class User extends Model {
   @PrimaryKey
   @AutoIncrement
   @AllowNull(false)
-  @Unique
   @Column
   declare id: number;
   @AllowNull(false)
@@ -24,6 +27,7 @@ export class Users extends Model {
   @Column
   name: string;
   @AllowNull(false)
+  @Unique
   @Max(320)
   @Column
   email: string;
@@ -31,22 +35,4 @@ export class Users extends Model {
   @Max(60)
   @Column
   password: string;
-}
-
-@Table({ timestamps: false })
-export class Admins extends Model {
-  @PrimaryKey
-  @AutoIncrement
-  @AllowNull(false)
-  @Unique
-  @Column
-  declare id: number;
-  @AllowNull(false)
-  @ForeignKey(() => Users)
-  @Column
-  admins_users_FK: number;
-  @AllowNull(false)
-  @Default(true)
-  @Column
-  active: boolean;
 }

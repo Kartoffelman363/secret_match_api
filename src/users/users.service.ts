@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { genSaltSync, hashSync, compareSync } from 'bcrypt';
-import { Sequelize } from 'sequelize-typescript';
+import { compare, genSalt, hash } from 'bcrypt';
 import { InjectModel } from '@nestjs/sequelize';
-import { Admins, Users } from './users.model';
+import { RegUsrBody, User } from './user.model';
+import { Admin } from './admin.model';
 
 export interface Result {
   success: boolean;
@@ -12,26 +12,38 @@ export interface Result {
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(Users)
-    private usersModel: typeof Users,
-    //@InjectModel(Admins)
-    //private adminsModel: typeof Admins,
+    @InjectModel(User)
+    private userModel: typeof User,
+    @InjectModel(Admin)
+    private adminModel: typeof Admin,
   ) {}
-  async register(): Promise<Result> {
-    const salt = genSaltSync();
-    const pwd = 'krnekizelodolgogeslotkoreskrdolgomogocecelodal';
-    const hash = hashSync(pwd, salt);
+  async register(regUsrBody: RegUsrBody): Promise<Result> {
+    const salt = await genSalt();
+    const pwdHash = await hash(regUsrBody.password, salt);
+    try {
+      await this.userModel.create({
+        name: regUsrBody.name,
+        email: regUsrBody.email,
+        password: pwdHash,
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Error &&
+        error.name === 'SequelizeUniqueConstraintError'
+      ) {
+        return { success: false, extra: 'User already exists' };
+      }
+    }
     return {
       extra: {
-        pwd: pwd,
-        hash: hash,
-        salt: salt,
-        users: await this.usersModel.findAll(),
+        pwd: regUsrBody.password,
+        hash: pwdHash,
+        name: regUsrBody.name,
+        email: regUsrBody.email,
+        users: await this.userModel.findAll(),
+        admins: await this.adminModel.findAll(),
       },
-      success: compareSync(
-        'krnekizelodolgogeslotkoreskrdolgomogocecelodal',
-        hash,
-      ),
+      success: await compare(regUsrBody.password, pwdHash),
     };
   }
   login(): Result {

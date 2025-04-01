@@ -3,8 +3,8 @@ import { User } from './user.model';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Admin } from './admin.model';
 import { JwtModule } from '@nestjs/jwt';
+import { Admin } from './admin.model';
 
 @Module({
   imports: [
@@ -12,7 +12,7 @@ import { JwtModule } from '@nestjs/jwt';
     JwtModule.register({
       //TODO env
       secret: 'aaaaaaaaaaa',
-      signOptions: { expiresIn: '2m' },
+      signOptions: { expiresIn: '1m' },
     }),
   ],
   providers: [UsersService],

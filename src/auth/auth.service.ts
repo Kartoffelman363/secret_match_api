@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/user.model';
 import { compare } from 'bcrypt';
@@ -13,5 +17,12 @@ export class AuthService {
       throw new BadRequestException('Invalid password');
     }
     return usr;
+  }
+
+  async validateAdmin(email: string): Promise<void> {
+    const usr = await this.usersService.findAdminByEmail(email);
+    if (!usr.admin.active) {
+      throw new UnauthorizedException();
+    }
   }
 }

@@ -1,6 +1,14 @@
-import { Controller, Post, Get, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  UseGuards,
+  Request,
+  BadRequestException,
+} from '@nestjs/common';
 import { MatchService } from './match.service';
 import { AuthGuard } from '@nestjs/passport';
+import { userFromReq, UserFromReq } from '../types/UserFromReq';
 
 @Controller('match')
 export class MatchController {
@@ -8,8 +16,12 @@ export class MatchController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('join')
-  postJoin() {
-    return this.matchService.join();
+  postJoin(@Request() req: object) {
+    const user: UserFromReq | null = userFromReq(req);
+    if (user == null) {
+      throw new BadRequestException();
+    }
+    return this.matchService.join(user.username);
   }
 
   @UseGuards(AuthGuard('admin'))
@@ -20,7 +32,11 @@ export class MatchController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('view')
-  getView() {
-    return this.matchService.view();
+  getView(@Request() req: object) {
+    const user: UserFromReq | null = userFromReq(req);
+    if (user == null) {
+      throw new BadRequestException();
+    }
+    return this.matchService.view(user.username);
   }
 }

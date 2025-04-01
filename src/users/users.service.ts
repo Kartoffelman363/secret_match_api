@@ -2,9 +2,9 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { genSalt, hash } from 'bcrypt';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from './user.model';
-import { RegUsrBody } from '../types/RegUsrBody';
+import { RegUserBody } from '../types/RegUserBody';
 import { JwtService } from '@nestjs/jwt';
-import { LoginUsrBody } from '../types/LoginUsrBody';
+import { LoginUserBody } from '../types/LoginUserBody';
 import { LoginRes } from '../types/LoginRes';
 import { Admin } from './admin.model';
 import { AdminUser } from '../types/AdminUser';
@@ -18,13 +18,13 @@ export class UsersService {
     private adminModel: typeof Admin,
     private readonly jwtService: JwtService,
   ) {}
-  async register(regUsrBody: RegUsrBody): Promise<void> {
+  async register(regUserBody: RegUserBody): Promise<void> {
     const salt = await genSalt();
-    const pwdHash = await hash(regUsrBody.password, salt);
+    const pwdHash = await hash(regUserBody.password, salt);
     try {
       await this.userModel.create({
-        name: regUsrBody.name,
-        email: regUsrBody.email,
+        name: regUserBody.name,
+        email: regUserBody.email,
         password: pwdHash,
       });
     } catch (error: unknown) {
@@ -37,18 +37,18 @@ export class UsersService {
     }
   }
 
-  async login(loginUsrBody: LoginUsrBody): Promise<LoginRes> {
+  async login(loginUserBody: LoginUserBody): Promise<LoginRes> {
     return {
       jwtToken: await this.jwtService.signAsync({
-        username: loginUsrBody.email,
+        username: loginUserBody.email,
       }),
     };
   }
 
   async findOneByEmail(email: string): Promise<User> {
-    let usr: User | null;
+    let user: User | null;
     try {
-      usr = await this.userModel.findOne({
+      user = await this.userModel.findOne({
         where: {
           email: email,
         },
@@ -56,17 +56,17 @@ export class UsersService {
     } catch {
       throw new BadRequestException('Database error');
     }
-    if (usr === null) {
+    if (user == null) {
       throw new BadRequestException('User not found');
     }
-    return usr;
+    return user;
   }
 
   async findAdminByEmail(email: string): Promise<AdminUser> {
-    let usr: User | null;
+    let user: User | null;
     let admin: Admin | null;
     try {
-      usr = await this.userModel.findOne({
+      user = await this.userModel.findOne({
         where: {
           email: email,
         },
@@ -75,22 +75,22 @@ export class UsersService {
       console.error(e);
       throw new BadRequestException('User not found');
     }
-    if (usr === null) {
+    if (user == null) {
       throw new BadRequestException('User not found');
     }
     try {
       admin = await this.adminModel.findOne({
         where: {
-          uid: usr.id,
+          uid: user.id,
         },
       });
     } catch (e) {
       console.error(e);
       throw new BadRequestException('Admin not found');
     }
-    if (admin === null) {
+    if (admin == null) {
       throw new BadRequestException('Admin not found');
     }
-    return { user: usr, admin: admin };
+    return { user: user, admin: admin };
   }
 }

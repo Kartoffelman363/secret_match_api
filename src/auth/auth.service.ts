@@ -12,16 +12,16 @@ export class AuthService {
   constructor(private readonly usersService: UsersService) {}
 
   async validateUser(email: string, password: string): Promise<User> {
-    const usr = await this.usersService.findOneByEmail(email);
-    if (!(await compare(password, usr.password))) {
+    const user = await this.usersService.findOneByEmail(email);
+    if (!(await compare(password, user.password))) {
       throw new BadRequestException('Invalid password');
     }
-    return usr;
+    return user;
   }
 
   async validateAdmin(email: string): Promise<void> {
-    const usr = await this.usersService.findAdminByEmail(email);
-    if (!usr.admin.active) {
+    const user = await this.usersService.findAdminByEmail(email);
+    if (!user.admin.active) {
       throw new UnauthorizedException();
     }
   }

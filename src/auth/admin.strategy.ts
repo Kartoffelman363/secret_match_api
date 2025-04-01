@@ -3,7 +3,6 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AccessTokenPayload } from '../types/AccessTokenPayload';
 import { AuthService } from './auth.service';
-import { AdminAccessTokenPayload } from '../types/AdminAccessTokenPayload';
 
 @Injectable()
 export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
@@ -16,14 +15,12 @@ export class AdminStrategy extends PassportStrategy(Strategy, 'admin') {
     });
   }
 
-  async validate(
-    payload: AdminAccessTokenPayload,
-  ): Promise<AccessTokenPayload> {
+  async validate(payload: AccessTokenPayload): Promise<AccessTokenPayload> {
     try {
       await this.authService.validateAdmin(payload.username);
     } catch {
       throw new UnauthorizedException();
     }
-    return { email: payload.username };
+    return { username: payload.username };
   }
 }

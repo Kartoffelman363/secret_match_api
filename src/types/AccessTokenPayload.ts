@@ -1,3 +1,3 @@
 ﻿export interface AccessTokenPayload {
-  email: string;
+  username: string;
 }
